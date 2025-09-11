@@ -1,16 +1,20 @@
 # 🚗 Parqueadero - Backend de Gestión
 
-Un backend diseñado para la **gestión de parqueaderos**, que permite controlar entradas, salidas, pagos y generar reportes de cierre de turno.
-Construido con **Spring Boot** y **MySQL**, el proyecto garantiza confiabilidad, escalabilidad y facilidad de despliegue.
+Un backend diseñado para la **gestión de parqueaderos**, que permite controlar entradas, salidas, pagos y generar
+reportes de cierre de turno.
+Construido con **Spring Boot** y **MySQL**, el proyecto garantiza confiabilidad, escalabilidad y facilidad de
+despliegue.
 
 ---
 
 ## ⭐ Característica Destacada: Generación de Tickets
 
-La funcionalidad más importante del sistema es el **control mediante tickets**, lo que permite un registro claro y auditable de las operaciones:
+La funcionalidad más importante del sistema es el **control mediante tickets**, lo que permite un registro claro y
+auditable de las operaciones:
 
 * **Ticket de Entrada**: Registra el ingreso de vehículos con datos como placa, tipo y hora.
-* **Ticket de Cierre de Turno**: Resume las operaciones de un período, incluyendo vehículos atendidos y pagos realizados.
+* **Ticket de Cierre de Turno**: Resume las operaciones de un período, incluyendo vehículos atendidos y pagos
+  realizados.
 
 Esto asegura un control eficiente de la operación diaria y facilita la gestión administrativa.
 
@@ -37,7 +41,8 @@ Esto asegura un control eficiente de la operación diaria y facilita la gestión
 
 ## 🐳 Cómo Empezar con Docker (Recomendado)
 
-La forma más rápida de levantar el proyecto es usando **Docker Compose**, que inicializa tanto la base de datos como el backend.
+La forma más rápida de levantar el proyecto es usando **Docker Compose**, que inicializa tanto la base de datos como el
+backend.
 
 ### 1. Prerrequisitos
 
@@ -115,36 +120,39 @@ La aplicación correrá en:
 
 ## 🖨️ Habilitar Impresora (QZ Tray)
 
-Por defecto, la funcionalidad para imprimir recibos a través de QZ Tray está desactivada para facilitar el inicio rápido del backend. Para habilitarla, sigue estos pasos:
+Por defecto, la funcionalidad para imprimir recibos a través de QZ Tray está desactivada para facilitar el inicio rápido
+del backend. Para habilitarla, sigue estos pasos:
 
-1.  **Proporcionar una Clave Privada:**
-    Asegúrate de tener un archivo de clave privada válido (`private-key.pem`) y colócalo en la siguiente ruta:
-    ```
-    src/main/resources/keys/private-key.pem
-    ```
-    *Este archivo está ignorado por Git por seguridad.*
+1. **Proporcionar una Clave Privada:**
+   Asegúrate de tener un archivo de clave privada válido (`private-key.pem`) y colócalo en la siguiente ruta:
+   ```
+   src/main/resources/keys/private-key.pem
+   ```
+   *Este archivo está ignorado por Git por seguridad.*
 
-2.  **Activar el Controlador:**
-    En el archivo `src/main/java/com/parqueadero/controllers/QzSignatureController.java`, descomenta la anotación `@RestController`.
-    ```java
-    // Cambia de:
-    //@RestController
-    
-    // a:
-    @RestController
-    ```
+2. **Activar el Controlador:**
+   En el archivo `src/main/java/com/parqueadero/controllers/QzSignatureController.java`, descomenta la anotación
+   `@RestController`.
+   ```java
+   // Cambia de:
+   //@RestController
+   
+   // a:
+   @RestController
+   ```
 
-3.  **Activar la Configuración de la Clave:**
-    En el archivo `src/main/java/com/parqueadero/config/QzKeyConfig.java`, descomenta la anotación `@Configuration`.
-    ```java
-    // Cambia de:
-    //@Configuration
-    
-    // a:
-    @Configuration
-    ```
+3. **Activar la Configuración de la Clave:**
+   En el archivo `src/main/java/com/parqueadero/config/QzKeyConfig.java`, descomenta la anotación `@Configuration`.
+   ```java
+   // Cambia de:
+   //@Configuration
+   
+   // a:
+   @Configuration
+   ```
 
-Una vez completados estos pasos, reinicia la aplicación. El endpoint para firmar las peticiones de QZ Tray estará activo.
+Una vez completados estos pasos, reinicia la aplicación. El endpoint para firmar las peticiones de QZ Tray estará
+activo.
 
 ---
 
@@ -170,6 +178,6 @@ Proyecto desarrollado por **Cristian Flórez**.
 
 ## 📄 Licencia
 
-Distribuido bajo la licencia [MIT](LICENSE).
+Distribuido bajo la licencia [MIT](../repositorio_cristian/parqueadero_backend/LICENSE).
 
 ---

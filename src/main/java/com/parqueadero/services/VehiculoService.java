@@ -30,11 +30,22 @@ public class VehiculoService {
         vehiculoRepository.deleteById(id);
     }
 
-    public Optional<Vehiculo> actualizarVehiculo(Long id, Vehiculo vehiculoDetails) {
-        return vehiculoRepository.findById(id).map(vehiculo -> {
-            vehiculo.setPlaca(vehiculoDetails.getPlaca());
-            vehiculo.setTipo(vehiculoDetails.getTipo());
-            return vehiculoRepository.save(vehiculo);
+    public Vehiculo crearVehiculo(String placa, String tipo) {
+        return vehiculoRepository.findByPlaca(placa).map(vehiculoExistente -> {
+            // Si el vehículo existe y el tipo es diferente, lo actualiza.
+            if (!vehiculoExistente.getTipo().equalsIgnoreCase(tipo)) {
+                vehiculoExistente.setTipo(tipo);
+                return vehiculoRepository.save(vehiculoExistente);
+            }
+            // Si el tipo es el mismo, simplemente lo devuelve.
+            return vehiculoExistente;
+        }).orElseGet(() -> {
+            // Si no existe, crea uno nuevo.
+            Vehiculo vehiculoNuevo = new Vehiculo();
+            vehiculoNuevo.setPlaca(placa);
+            vehiculoNuevo.setTipo(tipo);
+            return vehiculoRepository.save(vehiculoNuevo);
         });
     }
+
 }

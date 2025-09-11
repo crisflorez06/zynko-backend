@@ -2,13 +2,14 @@ package com.parqueadero.models;
 
 import java.time.LocalDateTime;
 
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Entity;
+import jakarta.persistence.Column;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 
@@ -20,44 +21,54 @@ public class Ticket {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String codigoBarrasQR;
+    @Column(unique = true)
+    private String codigo;
     private LocalDateTime fechaHoraEntrada;
     private LocalDateTime fechaHoraSalida;
-    private Boolean pagado;
-    private String usuarioRecibio;
-    private String usuarioEntrego;
 
-    @OneToOne(cascade = CascadeType.ALL)
+    @ManyToOne
+    @JoinColumn(name = "usuario_recibio_id")
+    private Usuario usuarioRecibio;
+
+    @ManyToOne
+    @JoinColumn(name = "usuario_entrego_id")
+    private Usuario usuarioEntrego;
+
+    @ManyToOne(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinColumn(name = "vehiculo_id")
     private Vehiculo vehiculo;
 
     @OneToOne(mappedBy = "ticket", cascade = CascadeType.ALL)
     private Pago pago;
 
+    @ManyToOne
+    @JoinColumn(name = "parqueadero_id", nullable = false)
+    private Parqueadero parqueadero;
+
     public Ticket() {
     }
 
-    public Ticket(String codigoBarrasQR, LocalDateTime fechaHoraEntrada, LocalDateTime fechaHoraSalida, Boolean pagado,Vehiculo vehiculo, Pago pago, String usuarioRecibio, String usuarioEntrego) {
-        this.codigoBarrasQR = codigoBarrasQR;
+    public Ticket(String codigo, LocalDateTime fechaHoraEntrada, LocalDateTime fechaHoraSalida, Vehiculo vehiculo, Pago pago, Usuario usuarioRecibio, Usuario usuarioEntrego, Parqueadero parqueadero) {
+        this.codigo = codigo;
         this.fechaHoraEntrada = fechaHoraEntrada;
         this.fechaHoraSalida = fechaHoraSalida;
-        this.pagado = pagado;
         this.vehiculo = vehiculo;
         this.pago = pago;
         this.usuarioRecibio = usuarioRecibio;
         this.usuarioEntrego = usuarioEntrego;
+        this.parqueadero = parqueadero;
     }
 
-    public Ticket(Long id, String codigoBarrasQR, LocalDateTime fechaHoraEntrada, LocalDateTime fechaHoraSalida, Boolean pagado, Vehiculo vehiculo, Pago pago, String usuarioRecibio, String usuarioEntrego) {
+    public Ticket(Long id, String codigo, LocalDateTime fechaHoraEntrada, LocalDateTime fechaHoraSalida, Vehiculo vehiculo, Pago pago, Usuario usuarioRecibio, Usuario usuarioEntrego, Parqueadero parqueadero) {
         this.id = id;
-        this.codigoBarrasQR = codigoBarrasQR;
+        this.codigo = codigo;
         this.fechaHoraEntrada = fechaHoraEntrada;
         this.fechaHoraSalida = fechaHoraSalida;
-        this.pagado = pagado;
         this.vehiculo = vehiculo;
         this.pago = pago;
         this.usuarioRecibio = usuarioRecibio;
         this.usuarioEntrego = usuarioEntrego;
+        this.parqueadero = parqueadero;
     }
 
     public Long getId() {
@@ -68,12 +79,12 @@ public class Ticket {
         this.id = id;
     }
 
-    public String getCodigoBarrasQR() {
-        return codigoBarrasQR;
+    public String getCodigo() {
+        return codigo;
     }
 
-    public void setCodigoBarrasQR(String codigoBarrasQR) {
-        this.codigoBarrasQR = codigoBarrasQR;
+    public void setCodigo(String codigo) {
+        this.codigo = codigo;
     }
 
     public LocalDateTime getFechaHoraEntrada() {
@@ -92,28 +103,20 @@ public class Ticket {
         this.fechaHoraSalida = fechaHoraSalida;
     }
 
-    public String getUsuarioRecibio() {
+    public Usuario getUsuarioRecibio() {
         return usuarioRecibio;
     }
 
-    public void setUsuarioRecibio(String usuarioRecibio) {
+    public void setUsuarioRecibio(Usuario usuarioRecibio) {
         this.usuarioRecibio = usuarioRecibio;
     }
 
-    public String getUsuarioEntrego() {
+    public Usuario getUsuarioEntrego() {
         return usuarioEntrego;
     }
 
-    public void setUsuarioEntrego(String usuarioEntrego) {
+    public void setUsuarioEntrego(Usuario usuarioEntrego) {
         this.usuarioEntrego = usuarioEntrego;
-    }
-
-    public Boolean getPagado() {
-        return pagado;
-    }
-
-    public void setPagado(Boolean pagado) {
-        this.pagado = pagado;
     }
 
     public Vehiculo getVehiculo() {
@@ -130,5 +133,13 @@ public class Ticket {
 
     public void setPago(Pago pago) {
         this.pago = pago;
-    }  
+    }
+
+    public Parqueadero getParqueadero() {
+        return parqueadero;
+    }
+
+    public void setParqueadero(Parqueadero parqueadero) {
+        this.parqueadero = parqueadero;
+    }
 }

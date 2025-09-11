@@ -1,11 +1,7 @@
 package com.parqueadero.models;
 
+import jakarta.persistence.*;
 import java.time.LocalDateTime;
-
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
 
 @Entity
 public class CierreTurno {
@@ -14,19 +10,15 @@ public class CierreTurno {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private LocalDateTime fechaCreacion;
     private LocalDateTime fechaInicioTurno;
     private LocalDateTime fechaFinTurno;
-
-    private int totalVehiculosEntraron;
-    private int totalVehiculosSalieron;
-    private double totalIngresos;
-    private int vehiculosRestantes;
-
-    private String detalleEntrantes;
-    private String detalleSalientes;
-    private String detalleRestantes;
+    private Integer totalIngresos; // Este campo guardará la suma de todos los parqueaderos
     private String nombreUsuario;
+
+    // CAMBIO PRINCIPAL: Un único campo para guardar todos los detalles.
+    @Lob // Anotación para Large Object, ideal para texto largo.
+    @Column(columnDefinition = "TEXT")
+    private String detallesJson;
 
     public CierreTurno() {
     }
@@ -39,14 +31,6 @@ public class CierreTurno {
 
     public void setId(Long id) {
         this.id = id;
-    }
-
-    public LocalDateTime getFechaCreacion() {
-        return fechaCreacion;
-    }
-
-    public void setFechaCreacion(LocalDateTime fechaCreacion) {
-        this.fechaCreacion = fechaCreacion;
     }
 
     public LocalDateTime getFechaInicioTurno() {
@@ -65,60 +49,12 @@ public class CierreTurno {
         this.fechaFinTurno = fechaFinTurno;
     }
 
-    public int getTotalVehiculosEntraron() {
-        return totalVehiculosEntraron;
-    }
-
-    public void setTotalVehiculosEntraron(int totalVehiculosEntraron) {
-        this.totalVehiculosEntraron = totalVehiculosEntraron;
-    }
-
-    public int getTotalVehiculosSalieron() {
-        return totalVehiculosSalieron;
-    }
-
-    public void setTotalVehiculosSalieron(int totalVehiculosSalieron) {
-        this.totalVehiculosSalieron = totalVehiculosSalieron;
-    }
-
-    public double getTotalIngresos() {
+    public Integer getTotalIngresos() {
         return totalIngresos;
     }
 
-    public void setTotalIngresos(double totalIngresos) {
+    public void setTotalIngresos(Integer totalIngresos) {
         this.totalIngresos = totalIngresos;
-    }
-
-    public int getVehiculosRestantes() {
-        return vehiculosRestantes;
-    }
-
-    public void setVehiculosRestantes(int vehiculosRestantes) {
-        this.vehiculosRestantes = vehiculosRestantes;
-    }
-
-    public String getDetalleEntrantes() {
-        return detalleEntrantes;
-    }
-
-    public void setDetalleEntrantes(String detalleEntrantes) {
-        this.detalleEntrantes = detalleEntrantes;
-    }
-
-    public String getDetalleSalientes() {
-        return detalleSalientes;
-    }
-
-    public void setDetalleSalientes(String detalleSalientes) {
-        this.detalleSalientes = detalleSalientes;
-    }
-
-    public String getDetalleRestantes() {
-        return detalleRestantes;
-    }
-
-    public void setDetalleRestantes(String detalleRestantes) {
-        this.detalleRestantes = detalleRestantes;
     }
 
     public String getNombreUsuario() {
@@ -127,5 +63,13 @@ public class CierreTurno {
 
     public void setNombreUsuario(String nombreUsuario) {
         this.nombreUsuario = nombreUsuario;
+    }
+
+    public String getDetallesJson() {
+        return detallesJson;
+    }
+
+    public void setDetallesJson(String detallesJson) {
+        this.detallesJson = detallesJson;
     }
 }

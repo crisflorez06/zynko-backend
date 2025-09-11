@@ -1,20 +1,26 @@
 package com.parqueadero.services;
 
-import com.parqueadero.models.Ticket;
-import com.parqueadero.models.DTOS.TicketCierreTurno;
-import com.parqueadero.repositories.TicketRepository;
-import org.springframework.data.domain.Sort;
-import org.springframework.data.jpa.domain.Specification;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import com.parqueadero.dtos.cierreTurno.DetalleParqueaderoCierre;
+import com.parqueadero.dtos.vehiculos.TotalVehiculosDTO;
+import com.parqueadero.dtos.vehiculos.VehiculoCierreDTO;
+import com.parqueadero.models.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.parqueadero.dtos.cierreTurno.TicketCierreTurnoResponse;
+import com.parqueadero.dtos.tickets.TicketEntradaRequest;
+import com.parqueadero.dtos.tickets.TicketMensualidadRequest;
+import com.parqueadero.dtos.tickets.TicketSalidaRequest;
+import com.parqueadero.repositories.TicketRepository;
 
 @Service
 public class TicketService {
@@ -25,105 +31,260 @@ public class TicketService {
     @Autowired
     private PagoService pagoService;
 
-    public Page<Ticket> buscarTodos(Pageable pageable, String codigo, String placa, String tipo, String usuarioRecibio, String usuarioEntrego, LocalDateTime fechaInicio, LocalDateTime fechaFin, Boolean pagado) {
-        Pageable pageableOrdenado = PageRequest.of(
-            pageable.getPageNumber(),
-            pageable.getPageSize(),
-            Sort.by("fechaHoraEntrada").descending()
-        );
+    @Autowired
+    private VehiculoService vehiculoService;
+
+    @Autowired
+    private UsuarioService usuarioService;
+
+    @Autowired
+    private ParqueaderoService parqueaderoService;
+
+    public Page<Ticket> buscarTodos(Pageable pageable, String codigo, String placa, String tipo, String usuarioRecibio,
+                                    String usuarioEntrego, LocalDateTime fechaInicio, LocalDateTime fechaFin, Boolean pagado, String parqueadero) {
 
         Specification<Ticket> spec = TicketSpecification.hasCodigo(codigo)
-            .and(TicketSpecification.hasPlaca(placa))
-            .and(TicketSpecification.hasTipo(tipo))
-            .and(TicketSpecification.hasUsuarioRecibio(usuarioRecibio))
-            .and(TicketSpecification.hasUsuarioEntrego(usuarioEntrego))
-            .and(TicketSpecification.isPagado(pagado))
-            .and(TicketSpecification.fechaEntradaBetween(fechaInicio, fechaFin));
+                .and(TicketSpecification.hasPlaca(placa))
+                .and(TicketSpecification.hasTipo(tipo))
+                .and(TicketSpecification.hasUsuarioRecibio(usuarioRecibio))
+                .and(TicketSpecification.hasUsuarioEntrego(usuarioEntrego))
+                .and(TicketSpecification.hasParqueadero(parqueadero))
+                .and(TicketSpecification.isPagado(pagado))
+                .and(TicketSpecification.fechaEntradaBetween(fechaInicio, fechaFin));
 
-        return ticketRepository.findAll(spec, pageableOrdenado);
+        return ticketRepository.findAll(spec, pageable);
     }
 
     public Optional<Ticket> buscarPorId(Long id) {
         return ticketRepository.findById(id);
     }
 
-    public Ticket guardar(Ticket ticket) {
-        if (ticket.getPago() != null && ticket.getPago().getId() == null) {
-            ticket.getPago().setTicket(ticket);
-        }
-        return ticketRepository.save(ticket);
-    }
-
     public void eliminarPorId(Long id) {
         ticketRepository.deleteById(id);
     }
 
+    // como este metodo se usa para cuando hay salida de vehiculo
+    // tenemos que validar que no exista un pago
     public Ticket buscarTicketCodigo(String codigoBarras) {
         if (codigoBarras != null && !codigoBarras.isEmpty()) {
-            return ticketRepository.findByCodigoBarrasQRAndPagado(codigoBarras, false);
+            Ticket ticket = ticketRepository.findByCodigo(codigoBarras);
+
+            if (ticket != null) {
+                //este if es utilizado para que si el estado ya es verdadero no me devuelva el ticket
+                //ya que sobrescribiria datos
+                if (!ticket.getPago().getEstado()) {
+                    return ticket;
+                }
+            }
         }
         return null;
     }
 
-    public List<Ticket> totalVehiculosParqueadero(Boolean estado) {
-        return ticketRepository.findByPagado(estado);
-    }
-
-    public Double totalAPagar(LocalDateTime fechaIncial, LocalDateTime fechaFinal) {
-        return ticketRepository.findTotal(fechaIncial, fechaFinal);
-    }
-
-    public String generarCodigo(String placa, LocalDateTime fechaEntrada) {
+    private String generarCodigo(String placa, LocalDateTime fechaEntrada) {
+        if (placa == null || placa.trim().isEmpty()) {
+            throw new IllegalArgumentException("La placa no puede ser nula o vacía para generar el código.");
+        }
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMddHHmmss");
         String fechaFormateada = fechaEntrada.format(formatter);
         return placa.toUpperCase() + fechaFormateada;
     }
 
-    public TicketCierreTurno ticketCierreTurno(LocalDateTime fechaInicio, LocalDateTime fechaFin) {
-        LocalDateTime fechaCierre = (fechaFin != null) ? fechaFin : LocalDateTime.now();
-        TicketCierreTurno cierreTurno = new TicketCierreTurno();
+    // logica para crear el ticket cuando se entra un vehiculo
+    @Transactional
+    public Ticket ticketEntradaVehiculo(TicketEntradaRequest ticketRequest) {
 
-        cierreTurno.setTotalVehiculosQueEntraron(ticketRepository.vehiculosQueEntraron(fechaInicio, fechaCierre));
-        cierreTurno.setTotalVehiculosQueSalieron(ticketRepository.vehiculosQueSalieron(fechaInicio, fechaCierre));
+        Usuario usuarioRecibio = usuarioService.buscarPorId(ticketRequest.getUsuarioRecibioId());
 
-        Double totalAPagar = ticketRepository.totalCierreTurno(fechaInicio, fechaCierre, "MENSUALIDAD");
-        cierreTurno.setTotalAPagar(totalAPagar != null ? totalAPagar : 0.0);
+        Vehiculo vehiculo = vehiculoService.crearVehiculo(ticketRequest.getPlaca(), ticketRequest.getTipoVehiculo());
 
-        cierreTurno.setVehiculosEnParqueadero(ticketRepository.findVehiculosSinSalida());
+        Parqueadero parqueadero = parqueaderoService.buscarOCrear(ticketRequest.getParqueadero());
 
-        cierreTurno.setTipoVehiculosEntrantes(ticketRepository.findTotalVehiculosEntrantes(fechaInicio, fechaCierre));
-        cierreTurno.setTipoVehiculosSaliente(ticketRepository.findTotalVehiculosSalientes(fechaInicio, fechaCierre));
-        cierreTurno.setTipoVehiculosParqueadero(ticketRepository.findTotalVehiculosParqueadero());
+        Ticket ticket = new Ticket();
 
-        return cierreTurno;
-    }
-
-    public Ticket crearTicket(Ticket ticket) {
-        if (ticket.getPagado() == null) {
-            ticket.setPagado(false);
-        }
+        ticket.setCodigo(generarCodigo(vehiculo.getPlaca(), LocalDateTime.now()));
         ticket.setFechaHoraEntrada(LocalDateTime.now());
-        ticket.setCodigoBarrasQR(generarCodigo(ticket.getVehiculo().getPlaca(), ticket.getFechaHoraEntrada()));
-        return guardar(ticket);
+        ticket.setUsuarioRecibio(usuarioRecibio);
+        ticket.setVehiculo(vehiculo);
+        ticket.setParqueadero(parqueadero);
+
+        Pago pago = new Pago(false, 0, null, ticket);
+
+        ticket.setPago(pago);
+
+        return ticketRepository.save(ticket);
     }
 
-    public Optional<Ticket> actualizarTicketSalida(String codigo, Ticket ticketDatos) {
-        Ticket ticketExistente = buscarTicketCodigo(codigo);
+    // logica cuando un vehiculo va a salir
+    @Transactional
+    public Ticket actualizarTicketSalida(TicketSalidaRequest ticketRequest) {
+        Ticket ticketExistente = buscarTicketCodigo(ticketRequest.getCodigo());
+
         if (ticketExistente == null) {
-            return Optional.empty();
+            throw new RuntimeException("El ticket con codigo: " + ticketRequest.getCodigo() + " no encontrado");
         }
 
         LocalDateTime salida = LocalDateTime.now();
-        ticketExistente.setFechaHoraSalida(salida);
-        ticketExistente.setPagado(true);
-        ticketExistente.setUsuarioEntrego(ticketDatos.getUsuarioEntrego());
-        ticketExistente.setPago(pagoService.calcularTotal(
-            codigo,
-            ticketExistente.getVehiculo().getTipo(),
-            ticketExistente.getFechaHoraEntrada(),
-            salida
-        ));
 
-        return Optional.of(guardar(ticketExistente));
+        ticketExistente.setFechaHoraSalida(salida);
+        ticketExistente.setUsuarioEntrego(usuarioService.buscarPorId(ticketRequest.getIdUsuarioLogueado()));
+        ticketExistente.getPago().setEstado(true);
+        ticketExistente.getPago().setFechaHora(salida);
+        ticketExistente.getPago().setTotal(pagoService.calcularTotal(ticketRequest.getCodigo()));
+
+        return ticketRepository.save(ticketExistente);
     }
+
+    // logica para manejar mensualidad
+    @Transactional
+    public Ticket ticketMensualidad(TicketMensualidadRequest ticketRequest) {
+
+        Usuario usuario = usuarioService.buscarPorId(ticketRequest.getUsuarioId());
+
+        Vehiculo vehiculo = vehiculoService.crearVehiculo(ticketRequest.getPlaca(), ticketRequest.getTipoVehiculo());
+
+        Parqueadero parqueadero = parqueaderoService.buscarOCrear(ticketRequest.getParqueadero());
+
+        Ticket ticket = new Ticket();
+
+        ticket.setCodigo("MENSUALIDAD" + generarCodigo(vehiculo.getPlaca(), LocalDateTime.now()));
+        ticket.setFechaHoraEntrada(ticketRequest.getFechaHoraEntrada());
+        ticket.setFechaHoraSalida(ticketRequest.getFechaHoraEntrada().plusDays(ticketRequest.getDias()));
+        ticket.setUsuarioRecibio(usuario);
+        ticket.setUsuarioEntrego(usuario);
+        ticket.setVehiculo(vehiculo);
+        ticket.setParqueadero(parqueadero);
+
+        Pago pago = new Pago(true, ticketRequest.getTotal(), LocalDateTime.now(), ticket);
+
+        ticket.setPago(pago);
+
+        return ticketRepository.save(ticket);
+    }
+
+    private List<TotalVehiculosDTO> calcularTotalesPorTipo(List<Ticket> tickets) {
+        if (tickets == null || tickets.isEmpty()) {
+            return new ArrayList<>();
+        }
+
+        return tickets.stream()
+                .map(Ticket::getVehiculo)
+                .collect(Collectors.groupingBy(Vehiculo::getTipo, Collectors.counting()))
+                .entrySet().stream()
+                .map(entry -> new TotalVehiculosDTO(entry.getKey(), entry.getValue()))
+                .collect(Collectors.toList());
+    }
+
+    //aca se genera los datos para pasarselo despues al servicio de cierre turno
+    public TicketCierreTurnoResponse generarDatosCierre(LocalDateTime fechaInicio, LocalDateTime fechaFinal) {
+
+        List<Parqueadero> todosLosParqueaderos = parqueaderoService.buscarTodos();
+        List<Ticket> ticketsCierre = ticketRepository.findTicketsParaCierre(fechaInicio, fechaFinal);
+        List<Ticket> ticketsParqueadero = ticketRepository.findTicketsAbiertos();
+
+
+        TicketCierreTurnoResponse cierreTurno = new TicketCierreTurnoResponse();
+        cierreTurno.setFechaInicio(fechaInicio);
+        cierreTurno.setFechaCierre(fechaFinal);
+
+        Map<String, DetalleParqueaderoCierre> mapaDetalles = new HashMap<>();
+
+        for (Parqueadero parqueadero : todosLosParqueaderos) {
+
+            if (parqueadero == null) {
+                System.out.println("ADVERTENCIA: Se encontró un objeto Parqueadero nulo en la lista. Saltando esta iteración.");
+                continue;
+            }
+            if (parqueadero.getNombre() == null) {
+                System.out.println("ADVERTENCIA: El parqueadero con ID: " + parqueadero.getId() + " tiene un nombre nulo. Saltando la creación de detalles para este parqueadero.");
+                continue;
+            }
+
+            DetalleParqueaderoCierre detalle = new DetalleParqueaderoCierre();
+            Long parqueaderoId = parqueadero.getId();
+
+            // --- A. Filtrar listas para este parqueadero ---
+            // Vehículos que entraron en el turno
+            List<Ticket> entrantes = ticketsCierre.stream()
+                    .filter(t -> t.getParqueadero().getId().equals(parqueaderoId) &&
+                            t.getFechaHoraEntrada().isAfter(fechaInicio.minusNanos(1)) &&
+                            t.getFechaHoraEntrada().isBefore(fechaFinal.plusNanos(1)))
+                    .collect(Collectors.toList());
+
+            // Vehículos que salieron en el turno
+            List<Ticket> salientes = ticketsCierre.stream()
+                    .filter(t -> t.getParqueadero().getId().equals(parqueaderoId) &&
+                            t.getFechaHoraSalida() != null &&
+                            t.getFechaHoraSalida().isAfter(fechaInicio.minusNanos(1)) &&
+                            t.getFechaHoraSalida().isBefore(fechaFinal.plusNanos(1)))
+                    .collect(Collectors.toList());
+
+            // Vehículos que siguen adentro (usando la segunda lista)
+            List<Ticket> dentroParqueadero = ticketsParqueadero.stream()
+                    .filter(t -> t.getParqueadero().getId().equals(parqueaderoId))
+                    .collect(Collectors.toList());
+
+            // Vehículos en mensualidad
+            List<Ticket> mensualidad = ticketsCierre.stream()
+                    .filter(t -> t.getParqueadero().getId().equals(parqueaderoId) &&
+                            t.getCodigo().contains("MENSUALIDAD") &&
+                            t.getPago().getFechaHora().isAfter(fechaInicio.minusNanos(1)) &&
+                            t.getPago().getFechaHora().isBefore(fechaFinal.plusNanos(1)))
+                    .collect(Collectors.toList());
+
+            // --- B. Asignar listas de vehículos al DTO de detalle ---
+            detalle.setListaVehiculosEntrantes(
+                    entrantes.stream().map(Ticket::getVehiculo).collect(Collectors.toList())
+            );
+            detalle.setListaVehiculosSalientes(
+                    salientes.stream().map(ticket -> new VehiculoCierreDTO(
+                            ticket.getVehiculo().getPlaca(),
+                            ticket.getVehiculo().getTipo(),
+                            ticket.getPago().getTotal()
+                    )).collect(Collectors.toList())
+            );
+            detalle.setVehiculosEnParqueadero(
+                    dentroParqueadero.stream().map(Ticket::getVehiculo).collect(Collectors.toList())
+            );
+            detalle.setVehiculosMensualidad(
+                    mensualidad.stream().map(ticket -> new VehiculoCierreDTO(
+                            ticket.getVehiculo().getPlaca(),
+                            ticket.getVehiculo().getTipo(),
+                            ticket.getPago().getTotal()
+                    )).collect(Collectors.toList())
+            );
+
+            // --- C. Calcular el total pagado en el turno para este parqueadero ---
+            int totalPagado = ticketsCierre.stream()
+                    .filter(t -> t.getParqueadero().getId().equals(parqueaderoId) &&
+                            t.getPago() != null && t.getPago().getFechaHora() != null &&
+                            t.getPago().getFechaHora().isAfter(fechaInicio.minusNanos(1)) &&
+                            t.getPago().getFechaHora().isBefore(fechaFinal.plusNanos(1)))
+                    .mapToInt(t -> t.getPago().getTotal())
+                    .sum();
+            detalle.setTotalAPagar(totalPagado);
+
+            // --- D. Calcular los totales por tipo de vehículo ---
+            detalle.setListaTiposVehiculosEntrantes(calcularTotalesPorTipo(entrantes));
+
+            detalle.setListaTiposVehiculosSalientes(calcularTotalesPorTipo(salientes));
+
+            detalle.setListaTiposVehiculosParqueadero(calcularTotalesPorTipo(dentroParqueadero));
+
+            // --- E. Añadir el detalle completado al mapa principal ---
+            System.out.println("Procesando parqueadero: " + parqueadero.getNombre());
+            mapaDetalles.put(parqueadero.getNombre(), detalle);
+        }
+
+        cierreTurno.setDetallesPorParqueadero(mapaDetalles);
+
+        int totalGeneral = mapaDetalles.values().stream()
+                .mapToInt(detalle -> detalle.getTotalAPagar() != null ? detalle.getTotalAPagar() : 0)
+                .sum();
+        cierreTurno.setTotal(totalGeneral);
+
+        return cierreTurno;
+
+    }
+
 }
+
