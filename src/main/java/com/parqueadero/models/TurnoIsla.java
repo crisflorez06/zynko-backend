@@ -90,7 +90,7 @@ public class TurnoIsla {
     }
 
     public void setNumeracionInicial(String numeracionInicial) {
-        this.numeracionInicial = TurnoIsla.this.numeracionInicial;
+        this.numeracionInicial = numeracionInicial;
     }
 
     public String getNumeracionFinal() {
@@ -98,7 +98,7 @@ public class TurnoIsla {
     }
 
     public void setNumeracionFinal(String numeracionFinal) {
-        this.numeracionFinal = TurnoIsla.this.numeracionFinal;
+        this.numeracionFinal = numeracionFinal;
     }
 
     public List<Tiro> getTiros() {

@@ -9,13 +9,13 @@ import lombok.NoArgsConstructor;
 @AllArgsConstructor
 public class Numeracion {
 
-    private Double gasolina1;
-    private Double gasolina2;
-    private Double gasolina3;
-    private Double gasolina4;
-    private Double diesel1;
-    private Double diesel2;
-    private Double diesel3;
-    private Double diesel4;
+    private double gasolina1;
+    private double gasolina2;
+    private double gasolina3;
+    private double gasolina4;
+    private double diesel1;
+    private double diesel2;
+    private double diesel3;
+    private double diesel4;
 
 }

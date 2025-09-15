@@ -1,5 +1,6 @@
 package com.parqueadero.controllers;
 
+import com.parqueadero.dtos.turnoIsla.Numeracion;
 import com.parqueadero.models.TurnoIsla;
 import com.parqueadero.services.TurnoIslaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,26 +42,7 @@ public class TurnoIslaController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<?> crear(@RequestBody TurnoIsla turnoIsla) {
-        try {
-            TurnoIsla nuevoTurno = turnoIslaService.guardar(turnoIsla);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoTurno);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al crear turno de isla: " + e.getMessage());
-        }
-    }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody TurnoIsla detalles) {
-        try {
-            return turnoIslaService.actualizar(id, detalles)
-                    .<ResponseEntity<?>>map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("TurnoIsla con ID " + id + " no encontrado"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al actualizar turno de isla: " + e.getMessage());
-        }
-    }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
@@ -72,6 +54,18 @@ public class TurnoIslaController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al eliminar turno de isla: " + e.getMessage());
+        }
+    }
+
+    @GetMapping("/numeracion-inicial")
+    public ResponseEntity<?> getNumeracionTurnoActivo() {
+
+        Numeracion numeracionActiva = turnoIslaService.numeracionTurnoActivo();
+
+        if (numeracionActiva != null) {
+            return ResponseEntity.ok(numeracionActiva);
+        } else {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró ningún turno activo en el sistema.");
         }
     }
 }
