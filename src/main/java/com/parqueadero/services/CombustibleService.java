@@ -1,7 +1,5 @@
 package com.parqueadero.services;
 
-import com.parqueadero.models.Combustible;
-import com.parqueadero.repositories.CombustibleRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 

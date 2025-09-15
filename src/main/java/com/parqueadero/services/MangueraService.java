@@ -1,7 +1,5 @@
 package com.parqueadero.services;
 
-import com.parqueadero.models.Manguera;
-import com.parqueadero.repositories.MangueraRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
