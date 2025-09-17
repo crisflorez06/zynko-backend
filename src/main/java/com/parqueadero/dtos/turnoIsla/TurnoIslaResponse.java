@@ -18,4 +18,5 @@ public class TurnoIslaResponse {
     private double diesel3;
     private double diesel4;
     private Integer totalVentas;
+    private Integer TotalTiros;
 }

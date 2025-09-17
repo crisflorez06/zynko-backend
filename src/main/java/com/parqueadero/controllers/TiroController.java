@@ -5,7 +5,14 @@ import com.parqueadero.services.TiroService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.*;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
 
@@ -16,62 +23,56 @@ public class TiroController {
     @Autowired
     private TiroService tiroService;
 
-    @GetMapping
-    public ResponseEntity<?> obtenerTodos() {
+    @GetMapping("/turno-activo")
+    public ResponseEntity<?> obtenerTirosDelTurnoActivo() {
         try {
-            List<Tiro> tiros = tiroService.buscarTodos();
+            List<Tiro> tiros = tiroService.buscarTirosPorTurno();
             if (tiros.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No hay tiros registrados");
+                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No se encontraron tiros para el turno activo.");
             }
             return ResponseEntity.ok(tiros);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al obtener tiros: " + e.getMessage());
-        }
-    }
-
-    @GetMapping("/{id}")
-    public ResponseEntity<?> obtenerPorId(@PathVariable Long id) {
-        try {
-            Tiro tiro = tiroService.buscarPorId(id);
-            return ResponseEntity.ok(tiro);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al obtener tiro: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al obtener los tiros: " + e.getMessage());
         }
     }
 
     @PostMapping
-    public ResponseEntity<?> crear(@RequestBody Tiro tiro) {
+    public ResponseEntity<?> crearTiro(@RequestBody Integer cantidad) {
         try {
-            Tiro nuevoTiro = tiroService.guardar(tiro);
+            if (cantidad == null || cantidad <= 0) {
+                return ResponseEntity.badRequest().build();
+            }
+            Tiro nuevoTiro = tiroService.crearTiro(cantidad);
             return ResponseEntity.status(HttpStatus.CREATED).body(nuevoTiro);
+        } catch (RuntimeException e) {
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al crear tiro: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody Tiro detalles) {
+    public ResponseEntity<Tiro> actualizarTiro(@PathVariable Long id, @RequestBody Tiro tiroDetalles) {
         try {
-            return tiroService.actualizar(id, detalles)
-                    .<ResponseEntity<?>>map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tiro con ID " + id + " no encontrado"));
+            return tiroService.actualizar(id, tiroDetalles)
+                    .map(ResponseEntity::ok)
+                    .orElse(ResponseEntity.notFound().build());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al actualizar tiro: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminar(@PathVariable Long id) {
+    public ResponseEntity<Tiro> anularTiro(@PathVariable Long id) {
         try {
-            tiroService.buscarPorId(id);
-            tiroService.eliminarPorId(id);
-            return ResponseEntity.noContent().build();
+            Tiro tiroAnulado = tiroService.anularTiro(id);
+            return ResponseEntity.ok(tiroAnulado);
         } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            return ResponseEntity.notFound().build();
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al eliminar tiro: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 }

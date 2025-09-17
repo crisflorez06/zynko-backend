@@ -42,7 +42,10 @@ public class TurnoIslaMapper {
             response.setDiesel4(numeracionInicial.getDiesel4());
         }
 
-        // 3. Asignar el total directamente desde el valor guardado en la entidad.
+        response.setTotalTiros(turnoIsla.getTiros().stream()
+                .mapToInt(t -> t.getCantidad() != null ? t.getCantidad() : 0)
+                .sum());
+
         response.setTotalVentas(turnoIsla.getTotal());
 
         return response;
