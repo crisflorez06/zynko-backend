@@ -1,6 +1,9 @@
 package com.parqueadero.controllers;
 
+import com.parqueadero.dtos.tickets.TicketEntradaRequest;
+import com.parqueadero.dtos.tickets.TicketResponse;
 import com.parqueadero.dtos.turnoIsla.Numeracion;
+import com.parqueadero.dtos.turnoIsla.TurnoIslaResponse;
 import com.parqueadero.models.TurnoIsla;
 import com.parqueadero.services.TurnoIslaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +45,6 @@ public class TurnoIslaController {
         }
     }
 
-
-
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
         try {
@@ -57,15 +58,39 @@ public class TurnoIslaController {
         }
     }
 
-    @GetMapping("/numeracion-inicial")
-    public ResponseEntity<?> getNumeracionTurnoActivo() {
-
-        Numeracion numeracionActiva = turnoIslaService.numeracionTurnoActivo();
-
-        if (numeracionActiva != null) {
-            return ResponseEntity.ok(numeracionActiva);
-        } else {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("No se encontró ningún turno activo en el sistema.");
+    @GetMapping("/turno-activo")
+    public ResponseEntity<?> getTurnoActivo() {
+        try {
+            TurnoIslaResponse turnoActivo = turnoIslaService.getTurnoActivoResponse();
+            return ResponseEntity.ok(turnoActivo);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
     }
+
+    @PutMapping("/editar-inicial")
+    public ResponseEntity<?> actualizarNumeracionInicial(@RequestBody Numeracion numeracionDto) {
+        try {
+            Numeracion numeracionActualizada = turnoIslaService.editarNumeracionInicial(numeracionDto);
+            return ResponseEntity.ok(numeracionActualizada);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al actualizar la numeración: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/calcular-total")
+    public ResponseEntity<?> calcularVentas(@RequestBody Numeracion numeracionFinal) {
+        try {
+            Integer totalVentas = turnoIslaService.calcularVentasCombustible(numeracionFinal);
+            return ResponseEntity.ok(totalVentas);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al calcular las ventas: " + e.getMessage());
+        }
+    }
+
+
 }

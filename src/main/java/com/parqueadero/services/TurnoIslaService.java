@@ -1,7 +1,9 @@
 package com.parqueadero.services;
 
 import com.parqueadero.dtos.turnoIsla.Numeracion;
+import com.parqueadero.dtos.turnoIsla.TurnoIslaResponse;
 import com.parqueadero.mappers.NumeracionMapper;
+import com.parqueadero.mappers.TurnoIslaMapper;
 import com.parqueadero.models.TurnoIsla;
 import com.parqueadero.models.Usuario;
 import com.parqueadero.repositories.TurnoIslaRepository;
@@ -9,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 public class TurnoIslaService {
@@ -18,7 +19,13 @@ public class TurnoIslaService {
     private TurnoIslaRepository turnoIslaRepository;
 
     @Autowired
+    private AjustesService ajustesService;
+
+    @Autowired
     private NumeracionMapper numeracionMapper;
+
+    @Autowired
+    private TurnoIslaMapper turnoIslaMapper;
 
     public List<TurnoIsla> buscarTodos() {
         return turnoIslaRepository.findAll();
@@ -44,21 +51,12 @@ public class TurnoIslaService {
 
     public TurnoIsla crearNuevoTurno(Usuario usuario){
 
-        // Mensaje para saber que entramos al método
-
         TurnoIsla turnoIsla = new TurnoIsla();
 
-        // Llamamos al método para obtener la numeración
         String numeracionInicialJson = ultimaNumeracion();
 
-        // --- ¡PASO CLAVE DE DEPURACIÓN! ---
-        // Imprimimos en la consola el valor exacto que obtuvimos del método anterior.
-        // Esto nos dirá la verdad sobre lo que está pasando.
 
-        // Asignamos el valor al objeto
         turnoIsla.setNumeracionInicial(numeracionInicialJson);
-
-        // Asignamos el resto de los datos
         turnoIsla.setUsuario(usuario);
         turnoIsla.setFechaInicio(usuario.getFechaInicioSesion());
 
@@ -68,13 +66,58 @@ public class TurnoIslaService {
 
     public Numeracion numeracionTurnoActivo() {
 
-        Optional<TurnoIsla> turnoActivo = turnoIslaRepository.findTopByFechaFinalIsNullOrderByIdDesc();
-
-        return turnoActivo
-                .map(turno -> {
-                    String jsonInicial = turno.getNumeracionInicial();
-                    return numeracionMapper.stringToDto(jsonInicial);
-                })
-                .orElse(null);
+        try {
+            TurnoIsla turnoActivo = getTurnoActivo();
+            String jsonInicial = turnoActivo.getNumeracionInicial();
+            return numeracionMapper.stringToDto(jsonInicial);
+        } catch (RuntimeException e) {
+            return null;
+        }
     }
+
+    public Numeracion editarNumeracionInicial(Numeracion nuevaNumeracion) {
+
+        TurnoIsla turnoActivo = getTurnoActivo();
+
+        String nuevaNumeracionJson = numeracionMapper.dtoToString(nuevaNumeracion);
+
+        turnoActivo.setNumeracionInicial(nuevaNumeracionJson);
+        turnoIslaRepository.save(turnoActivo);
+        return nuevaNumeracion;
+    }
+
+    //este metodo se creo para mostrar de una manera mas limpia los datos en el frontend
+    public TurnoIslaResponse getTurnoActivoResponse() {
+        TurnoIsla turnoActivo = getTurnoActivo();
+        return turnoIslaMapper.toResponseDto(turnoActivo);
+    }
+
+    //sabemos cual es el turno activo ya que sera el que no tenga fecha de fin de turno
+    private TurnoIsla getTurnoActivo() {
+        return turnoIslaRepository.findTopByFechaFinalIsNullOrderByIdDesc()
+                .orElseThrow(() -> new RuntimeException("No se encontró ningún turno activo en el sistema."));
+    }
+
+    public Integer calcularVentasCombustible(Numeracion numeracionFinal) {
+
+        Numeracion numeracionInicial = numeracionTurnoActivo();
+        TurnoIsla turnoIsla = getTurnoActivo();
+
+        // Diferencias de galones con decimales
+        double galonesGasolina = numeracionFinal.getTotalGasolina() - numeracionInicial.getTotalGasolina();
+        double galonesDiesel = numeracionFinal.getTotalDiesel() - numeracionInicial.getTotalDiesel();
+
+        // Calcular ventas en double
+        double totalVentaGasolina = galonesGasolina * ajustesService.getPrecioGasolina();
+        double totalVentaDiesel = galonesDiesel * ajustesService.getPrecioDiesel();
+
+        // Convertir a Integer solo al final
+        int total = (int) Math.round(totalVentaGasolina + totalVentaDiesel);
+
+        turnoIsla.setTotal(total);
+        turnoIslaRepository.save(turnoIsla);
+
+        return total;
+    }
+
 }
