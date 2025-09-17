@@ -1,31 +1,14 @@
 package com.parqueadero.dtos.tickets;
 
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
 public class TicketSalidaRequest {
 
     private String codigo;
     private long idUsuarioLogueado;
-
-    public TicketSalidaRequest() {
-    }
-
-    public TicketSalidaRequest(String codigo, long idUsuarioLogueado) {
-        this.codigo = codigo;
-        this.idUsuarioLogueado = idUsuarioLogueado;
-    }
-
-    public String getCodigo() {
-        return codigo;
-    }
-
-    public void setCodigo(String codigo) {
-        this.codigo = codigo;
-    }
-
-    public long getIdUsuarioLogueado() {
-        return idUsuarioLogueado;
-    }
-
-    public void setIdUsuarioLogueado(long idUsuarioLogueado) {
-        this.idUsuarioLogueado = idUsuarioLogueado;
-    }
 }

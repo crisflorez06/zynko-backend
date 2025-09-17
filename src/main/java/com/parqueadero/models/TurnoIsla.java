@@ -20,14 +20,17 @@ public class TurnoIsla {
 
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFinal;
+    private Integer totalGalonesGasolina;
+    private Integer totalGalonesDiesel;
+    private Integer totalVentaGasolina;
+    private Integer TotalVentaDiesel;
 
-    @ManyToOne
-    @JoinColumn(name = "corriente_id")
-    private Combustible corriente;
 
-    @ManyToOne
-    @JoinColumn(name = "diesel_id")
-    private Combustible diesel;
+    @Column(name = "numeracion_inicial", columnDefinition = "TEXT")
+    private String numeracionInicial;
+
+    @Column(name = "numeracion_final", columnDefinition = "TEXT")
+    private String numeracionFinal;
 
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "turno_isla_id")
@@ -82,20 +85,20 @@ public class TurnoIsla {
         this.fechaFinal = fechaFinal;
     }
 
-    public Combustible getCorriente() {
-        return corriente;
+    public String getNumeracionInicial() {
+        return numeracionInicial;
     }
 
-    public void setCorriente(Combustible corriente) {
-        this.corriente = corriente;
+    public void setNumeracionInicial(String numeracionInicial) {
+        this.numeracionInicial = numeracionInicial;
     }
 
-    public Combustible getDiesel() {
-        return diesel;
+    public String getNumeracionFinal() {
+        return numeracionFinal;
     }
 
-    public void setDiesel(Combustible diesel) {
-        this.diesel = diesel;
+    public void setNumeracionFinal(String numeracionFinal) {
+        this.numeracionFinal = numeracionFinal;
     }
 
     public List<Tiro> getTiros() {
@@ -136,5 +139,37 @@ public class TurnoIsla {
 
     public void setTotal(Integer total) {
         this.total = total;
+    }
+
+    public Integer getTotalGalonesGasolina() {
+        return totalGalonesGasolina;
+    }
+
+    public void setTotalGalonesGasolina(Integer totalGalonesGasolina) {
+        this.totalGalonesGasolina = totalGalonesGasolina;
+    }
+
+    public Integer getTotalGalonesDiesel() {
+        return totalGalonesDiesel;
+    }
+
+    public void setTotalGalonesDiesel(Integer totalGalonesDiesel) {
+        this.totalGalonesDiesel = totalGalonesDiesel;
+    }
+
+    public Integer getTotalVentaGasolina() {
+        return totalVentaGasolina;
+    }
+
+    public void setTotalVentaGasolina(Integer totalVentaGasolina) {
+        this.totalVentaGasolina = totalVentaGasolina;
+    }
+
+    public Integer getTotalVentaDiesel() {
+        return TotalVentaDiesel;
+    }
+
+    public void setTotalVentaDiesel(Integer getTotalVentaDiesel) {
+        this.TotalVentaDiesel = getTotalVentaDiesel;
     }
 }

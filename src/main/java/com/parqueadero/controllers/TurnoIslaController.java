@@ -1,5 +1,9 @@
 package com.parqueadero.controllers;
 
+import com.parqueadero.dtos.tickets.TicketEntradaRequest;
+import com.parqueadero.dtos.tickets.TicketResponse;
+import com.parqueadero.dtos.turnoIsla.Numeracion;
+import com.parqueadero.dtos.turnoIsla.TurnoIslaResponse;
 import com.parqueadero.models.TurnoIsla;
 import com.parqueadero.services.TurnoIslaService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -41,27 +45,6 @@ public class TurnoIslaController {
         }
     }
 
-    @PostMapping
-    public ResponseEntity<?> crear(@RequestBody TurnoIsla turnoIsla) {
-        try {
-            TurnoIsla nuevoTurno = turnoIslaService.guardar(turnoIsla);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoTurno);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al crear turno de isla: " + e.getMessage());
-        }
-    }
-
-    @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody TurnoIsla detalles) {
-        try {
-            return turnoIslaService.actualizar(id, detalles)
-                    .<ResponseEntity<?>>map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("TurnoIsla con ID " + id + " no encontrado"));
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al actualizar turno de isla: " + e.getMessage());
-        }
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<?> eliminar(@PathVariable Long id) {
         try {
@@ -74,4 +57,40 @@ public class TurnoIslaController {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al eliminar turno de isla: " + e.getMessage());
         }
     }
+
+    @GetMapping("/turno-activo")
+    public ResponseEntity<?> getTurnoActivo() {
+        try {
+            TurnoIslaResponse turnoActivo = turnoIslaService.getTurnoActivoResponse();
+            return ResponseEntity.ok(turnoActivo);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        }
+    }
+
+    @PutMapping("/editar-inicial")
+    public ResponseEntity<?> actualizarNumeracionInicial(@RequestBody Numeracion numeracionDto) {
+        try {
+            Numeracion numeracionActualizada = turnoIslaService.editarNumeracionInicial(numeracionDto);
+            return ResponseEntity.ok(numeracionActualizada);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al actualizar la numeración: " + e.getMessage());
+        }
+    }
+
+    @PostMapping("/calcular-total")
+    public ResponseEntity<?> calcularVentas(@RequestBody Numeracion numeracionFinal) {
+        try {
+            Integer totalVentas = turnoIslaService.calcularVentasCombustible(numeracionFinal);
+            return ResponseEntity.ok(totalVentas);
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al calcular las ventas: " + e.getMessage());
+        }
+    }
+
+
 }
