@@ -20,10 +20,10 @@ public class TurnoIsla {
 
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFinal;
-    private Integer totalGalonesGasolina;
-    private Integer totalGalonesDiesel;
-    private Integer totalVentaGasolina;
-    private Integer TotalVentaDiesel;
+    private Double totalGalonesGasolina = 0.0;
+    private Double totalGalonesDiesel = 0.0;
+    private Double totalVentaGasolina = 0.0;
+    private Double totalVentaDiesel = 0.0;
 
 
     @Column(name = "numeracion_inicial", columnDefinition = "TEXT")
@@ -141,35 +141,35 @@ public class TurnoIsla {
         this.total = total;
     }
 
-    public Integer getTotalGalonesGasolina() {
+    public Double getTotalGalonesGasolina() {
         return totalGalonesGasolina;
     }
 
-    public void setTotalGalonesGasolina(Integer totalGalonesGasolina) {
+    public void setTotalGalonesGasolina(Double totalGalonesGasolina) {
         this.totalGalonesGasolina = totalGalonesGasolina;
     }
 
-    public Integer getTotalGalonesDiesel() {
+    public Double getTotalGalonesDiesel() {
         return totalGalonesDiesel;
     }
 
-    public void setTotalGalonesDiesel(Integer totalGalonesDiesel) {
+    public void setTotalGalonesDiesel(Double totalGalonesDiesel) {
         this.totalGalonesDiesel = totalGalonesDiesel;
     }
 
-    public Integer getTotalVentaGasolina() {
+    public Double getTotalVentaGasolina() {
         return totalVentaGasolina;
     }
 
-    public void setTotalVentaGasolina(Integer totalVentaGasolina) {
+    public void setTotalVentaGasolina(Double totalVentaGasolina) {
         this.totalVentaGasolina = totalVentaGasolina;
     }
 
-    public Integer getTotalVentaDiesel() {
-        return TotalVentaDiesel;
+    public Double getTotalVentaDiesel() {
+        return totalVentaDiesel;
     }
 
-    public void setTotalVentaDiesel(Integer getTotalVentaDiesel) {
-        this.TotalVentaDiesel = getTotalVentaDiesel;
+    public void setTotalVentaDiesel(Double totalVentaDiesel) {
+        this.totalVentaDiesel = totalVentaDiesel;
     }
 }

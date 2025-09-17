@@ -1,5 +1,6 @@
 package com.parqueadero.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
@@ -22,6 +23,11 @@ public class Tiro {
     @MapKeyColumn(name = "tiro_tipo_dia")
     @Column(name = "tiro_tipo_hora")
     private Map<Integer, String> tipoTurno;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "turno_isla_id")
+    @JsonIgnore
+    private TurnoIsla turnoIsla;
 
     public Tiro() {
     }
@@ -64,5 +70,13 @@ public class Tiro {
 
     public void setTipoTurno(Map<Integer, String> tipoTurno) {
         this.tipoTurno = tipoTurno;
+    }
+
+    public TurnoIsla getTurnoIsla() {
+        return turnoIsla;
+    }
+
+    public void setTurnoIsla(TurnoIsla turnoIsla) {
+        this.turnoIsla = turnoIsla;
     }
 }

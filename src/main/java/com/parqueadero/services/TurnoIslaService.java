@@ -93,7 +93,7 @@ public class TurnoIslaService {
     }
 
     //sabemos cual es el turno activo ya que sera el que no tenga fecha de fin de turno
-    private TurnoIsla getTurnoActivo() {
+    public TurnoIsla getTurnoActivo() {
         return turnoIslaRepository.findTopByFechaFinalIsNullOrderByIdDesc()
                 .orElseThrow(() -> new RuntimeException("No se encontró ningún turno activo en el sistema."));
     }
@@ -103,18 +103,16 @@ public class TurnoIslaService {
         Numeracion numeracionInicial = numeracionTurnoActivo();
         TurnoIsla turnoIsla = getTurnoActivo();
 
-        // Diferencias de galones con decimales
-        double galonesGasolina = numeracionFinal.getTotalGasolina() - numeracionInicial.getTotalGasolina();
-        double galonesDiesel = numeracionFinal.getTotalDiesel() - numeracionInicial.getTotalDiesel();
+        turnoIsla.setTotalGalonesGasolina(numeracionFinal.getTotalGasolina() - numeracionInicial.getTotalGasolina());
+        turnoIsla.setTotalGalonesDiesel(numeracionFinal.getTotalDiesel() - numeracionInicial.getTotalDiesel());
 
-        // Calcular ventas en double
-        double totalVentaGasolina = galonesGasolina * ajustesService.getPrecioGasolina();
-        double totalVentaDiesel = galonesDiesel * ajustesService.getPrecioDiesel();
+        turnoIsla.setTotalVentaGasolina(turnoIsla.getTotalGalonesGasolina() * ajustesService.getPrecioGasolina());
+        turnoIsla.setTotalVentaDiesel(turnoIsla.getTotalGalonesDiesel() * ajustesService.getPrecioDiesel());
 
-        // Convertir a Integer solo al final
-        int total = (int) Math.round(totalVentaGasolina + totalVentaDiesel);
+        int total = (int) Math.round(turnoIsla.getTotalVentaGasolina() + turnoIsla.getTotalVentaDiesel());
 
         turnoIsla.setTotal(total);
+
         turnoIslaRepository.save(turnoIsla);
 
         return total;
