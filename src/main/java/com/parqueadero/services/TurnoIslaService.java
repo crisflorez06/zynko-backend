@@ -59,12 +59,12 @@ public class TurnoIslaService {
         turnoIsla.setNumeracionInicial(numeracionInicialJson);
         turnoIsla.setUsuario(usuario);
         turnoIsla.setFechaInicio(usuario.getFechaInicioSesion());
-
+        turnoIsla.setActivo(true);
 
         return turnoIslaRepository.save(turnoIsla);
     }
 
-    public Numeracion numeracionTurnoActivo() {
+    public Numeracion numeracionInicialTurnoActivo() {
 
         try {
             TurnoIsla turnoActivo = getTurnoActivo();
@@ -92,15 +92,16 @@ public class TurnoIslaService {
         return turnoIslaMapper.toResponseDto(turnoActivo);
     }
 
-    //sabemos cual es el turno activo ya que sera el que no tenga fecha de fin de turno
+    //en la base de datos siempre habra solo un usuario activo
     public TurnoIsla getTurnoActivo() {
-        return turnoIslaRepository.findTopByFechaFinalIsNullOrderByIdDesc()
+        return turnoIslaRepository.findByActivoTrue()
                 .orElseThrow(() -> new RuntimeException("No se encontró ningún turno activo en el sistema."));
     }
 
     public Integer calcularVentasCombustible(Numeracion numeracionFinal) {
 
-        Numeracion numeracionInicial = numeracionTurnoActivo();
+        Numeracion numeracionInicial = numeracionInicialTurnoActivo();
+        String numeracionFInalJson = numeracionMapper.dtoToString(numeracionFinal);
         TurnoIsla turnoIsla = getTurnoActivo();
 
         turnoIsla.setTotalGalonesGasolina(numeracionFinal.getTotalGasolina() - numeracionInicial.getTotalGasolina());
@@ -111,6 +112,7 @@ public class TurnoIslaService {
 
         int total = (int) Math.round(turnoIsla.getTotalVentaGasolina() + turnoIsla.getTotalVentaDiesel());
 
+        turnoIsla.setNumeracionFinal(numeracionFInalJson);
         turnoIsla.setTotal(total);
 
         turnoIslaRepository.save(turnoIsla);

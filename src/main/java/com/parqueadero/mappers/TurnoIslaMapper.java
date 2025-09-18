@@ -28,19 +28,34 @@ public class TurnoIslaMapper {
 
         // 1. Obtener el objeto Numeracion desde el JSON de la numeración inicial.
         Numeracion numeracionInicial = numeracionMapper.stringToDto(turnoIsla.getNumeracionInicial());
+        Numeracion numeracionFinal = numeracionMapper.stringToDto(turnoIsla.getNumeracionFinal());
 
         // 2. Si existe la numeración inicial, copiar sus valores al DTO de respuesta.
         if (numeracionInicial != null) {
-            response.setGasolina1(numeracionInicial.getGasolina1());
-            response.setGasolina2(numeracionInicial.getGasolina2());
-            response.setGasolina3(numeracionInicial.getGasolina3());
-            response.setGasolina4(numeracionInicial.getGasolina4());
+            response.setGasolinaInicial1(numeracionInicial.getGasolina1());
+            response.setGasolinaInicial2(numeracionInicial.getGasolina2());
+            response.setGasolinaInicial3(numeracionInicial.getGasolina3());
+            response.setGasolinaInicial4(numeracionInicial.getGasolina4());
 
-            response.setDiesel1(numeracionInicial.getDiesel1());
-            response.setDiesel2(numeracionInicial.getDiesel2());
-            response.setDiesel3(numeracionInicial.getDiesel3());
-            response.setDiesel4(numeracionInicial.getDiesel4());
+            response.setDieselInicial1(numeracionInicial.getDiesel1());
+            response.setDieselInicial2(numeracionInicial.getDiesel2());
+            response.setDieselInicial3(numeracionInicial.getDiesel3());
+            response.setDieselInicial4(numeracionInicial.getDiesel4());
         }
+
+        if (numeracionFinal != null) {
+            response.setGasolinaFinal1(numeracionFinal.getGasolina1());
+            response.setGasolinaFinal2(numeracionFinal.getGasolina2());
+            response.setGasolinaFinal3(numeracionFinal.getGasolina3());
+            response.setGasolinaFinal4(numeracionFinal.getGasolina4());
+
+            response.setDieselFinal1(numeracionFinal.getDiesel1());
+            response.setDieselFinal2(numeracionFinal.getDiesel2());
+            response.setDieselFinal3(numeracionFinal.getDiesel3());
+            response.setDieselFinal4(numeracionFinal.getDiesel4());
+        }
+
+
 
         response.setTotalTiros(turnoIsla.getTiros().stream()
                 .mapToInt(t -> t.getCantidad() != null ? t.getCantidad() : 0)

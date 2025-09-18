@@ -18,6 +18,7 @@ public class TurnoIsla {
     @JoinColumn(name = "usuario_id")
     private Usuario usuario;
 
+    private boolean activo;
     private LocalDateTime fechaInicio;
     private LocalDateTime fechaFinal;
     private Double totalGalonesGasolina = 0.0;
@@ -67,6 +68,14 @@ public class TurnoIsla {
 
     public void setUsuario(Usuario usuario) {
         this.usuario = usuario;
+    }
+
+    public boolean isActivo() {
+        return activo;
+    }
+
+    public void setActivo(boolean activo) {
+        this.activo = activo;
     }
 
     public LocalDateTime getFechaInicio() {
