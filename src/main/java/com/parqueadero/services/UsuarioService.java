@@ -65,9 +65,10 @@ public class UsuarioService {
         return Optional.empty();
     }
 
-    public Usuario eliminarFechaInicioSesion(Usuario usuario) {
+    public Usuario eliminarInicioSesion(Usuario usuario) {
 
         usuario.setFechaInicioSesion(null);
+        turnoIslaService.cerrarTurnoIsla();
         return usuarioRepository.save(usuario);
     }
 

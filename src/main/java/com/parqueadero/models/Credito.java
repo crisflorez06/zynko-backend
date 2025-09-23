@@ -1,8 +1,10 @@
 package com.parqueadero.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.Map;
 
 @Entity
@@ -17,15 +19,17 @@ public class Credito {
     @JoinColumn(name = "cliente_id")
     private Cliente cliente;
 
-    @ElementCollection
-    @CollectionTable(name = "credito_productos", joinColumns = @JoinColumn(name = "credito_id"))
-    @MapKeyColumn(name = "producto_nombre")
-    @Column(name = "producto_cantidad")
-    private Map<String, Integer> productos;
-
+    @OneToMany(mappedBy = "credito", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CreditoProducto> items;
     private Integer total;
     private LocalDateTime fecha;
-    private String placa;
+    private  String placa;
+
+    //esta propiedad se creo con el fin de que haya una manera de encontrar los registros de un turno facilmente
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "turno_isla_id")
+    @JsonIgnore
+    private TurnoIsla turnoIsla;
 
     public Credito() {
     }
@@ -46,12 +50,12 @@ public class Credito {
         this.cliente = cliente;
     }
 
-    public Map<String, Integer> getProductos() {
-        return productos;
+    public List<CreditoProducto> getItems() {
+        return items;
     }
 
-    public void setProductos(Map<String, Integer> productos) {
-        this.productos = productos;
+    public void setItems(List<CreditoProducto> items) {
+        this.items = items;
     }
 
     public Integer getTotal() {
@@ -68,6 +72,14 @@ public class Credito {
 
     public void setFecha(LocalDateTime fecha) {
         this.fecha = fecha;
+    }
+
+    public TurnoIsla getTurnoIsla() {
+        return turnoIsla;
+    }
+
+    public void setTurnoIsla(TurnoIsla turnoIsla) {
+        this.turnoIsla = turnoIsla;
     }
 
     public String getPlaca() {

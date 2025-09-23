@@ -63,6 +63,12 @@ public class TurnoIslaMapper {
 
         response.setTotalVentas(turnoIsla.getTotal());
 
+        response.setTotalCreditos(turnoIsla.getCreditos().stream()
+                .mapToInt(c -> c.getTotal() != null ? c.getTotal() : 0)
+                .sum());
+
+        response.setTotalVentas(turnoIsla.getTotal());
+
         return response;
     }
 }

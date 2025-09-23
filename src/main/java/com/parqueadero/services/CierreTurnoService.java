@@ -64,7 +64,7 @@ public class CierreTurnoService {
         nuevoCierre.setTotalIngresos(dto.getTotal());
         nuevoCierre.setDetallesJson(convertirDetallesAJson(dto));
 
-        usuarioService.eliminarFechaInicioSesion(usuario);
+        usuarioService.eliminarInicioSesion(usuario);
 
         cierreTurnoRepository.save(nuevoCierre);
 
