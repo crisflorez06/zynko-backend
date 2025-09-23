@@ -20,20 +20,9 @@ public class TiroService {
     @Autowired
     private TurnoIslaService turnoIslaService;
 
-    public List<Tiro> buscarTodos() {
-        return tiroRepository.findAll();
-    }
 
     public Tiro buscarPorId(Long id) {
         return tiroRepository.findById(id).orElseThrow(() -> new RuntimeException("Tiro no encontrado con id: " + id));
-    }
-
-    public Tiro guardar(Tiro tiro) {
-        return tiroRepository.save(tiro);
-    }
-
-    public void eliminarPorId(Long id) {
-        tiroRepository.deleteById(id);
     }
 
     public Optional<Tiro> actualizar(Long id, Tiro detalles) {

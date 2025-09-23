@@ -92,7 +92,7 @@ public class TurnoIslaService {
         return turnoIslaMapper.toResponseDto(turnoActivo);
     }
 
-    //en la base de datos siempre habra solo un usuario activo
+    //en la base de datos siempre habra solo un turno activo
     public TurnoIsla getTurnoActivo() {
         return turnoIslaRepository.findByActivoTrue()
                 .orElseThrow(() -> new RuntimeException("No se encontró ningún turno activo en el sistema."));
@@ -118,6 +118,15 @@ public class TurnoIslaService {
         turnoIslaRepository.save(turnoIsla);
 
         return total;
+    }
+
+    public void cerrarTurnoIsla() {
+
+        TurnoIsla turnoActivo = getTurnoActivo();
+
+
+        turnoActivo.setActivo(false);
+        turnoIslaRepository.save(turnoActivo);
     }
 
 }

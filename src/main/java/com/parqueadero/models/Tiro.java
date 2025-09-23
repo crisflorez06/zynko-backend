@@ -18,11 +18,7 @@ public class Tiro {
     private Integer cantidad;
     private LocalDateTime fecha;
 
-    @ElementCollection
-    @CollectionTable(name = "tiro_tipo_turno", joinColumns = @JoinColumn(name = "tiro_id"))
-    @MapKeyColumn(name = "tiro_tipo_dia")
-    @Column(name = "tiro_tipo_hora")
-    private Map<Integer, String> tipoTurno;
+    private String tipoTurno;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "turno_isla_id")
@@ -64,11 +60,11 @@ public class Tiro {
         this.fecha = fecha;
     }
 
-    public Map<Integer, String> getTipoTurno() {
+    public String getTipoTurno() {
         return tipoTurno;
     }
 
-    public void setTipoTurno(Map<Integer, String> tipoTurno) {
+    public void setTipoTurno (String tipoTurno) {
         this.tipoTurno = tipoTurno;
     }
 

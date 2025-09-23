@@ -1,5 +1,8 @@
 package com.parqueadero.controllers;
 
+import com.parqueadero.dtos.creditos.CreditoRequest;
+import com.parqueadero.dtos.creditos.CreditoResponseDTO;
+import com.parqueadero.mappers.CreditoMapper;
 import com.parqueadero.models.Credito;
 import com.parqueadero.services.CreditoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,6 +11,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/creditos")
@@ -16,62 +20,79 @@ public class CreditoController {
     @Autowired
     private CreditoService creditoService;
 
-    @GetMapping
-    public ResponseEntity<?> obtenerTodos() {
+    @Autowired
+    private CreditoMapper creditoMapper;
+
+    @PostMapping
+    public ResponseEntity<?> crearCredito(@RequestBody CreditoRequest creditoRequest) {
         try {
-            List<Credito> creditos = creditoService.buscarTodos();
-            if (creditos.isEmpty()) {
-                return ResponseEntity.status(HttpStatus.NO_CONTENT).body("No hay creditos registrados");
-            }
-            return ResponseEntity.ok(creditos);
+            CreditoResponseDTO response = creditoService.crearCredito(creditoRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al obtener creditos: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al crear el crédito: " + e.getMessage());
         }
+    }
+
+    @GetMapping
+    public ResponseEntity<List<CreditoResponseDTO>> obtenerTodosLosCreditos() {
+        List<Credito> creditos = creditoService.buscarTodos();
+        List<CreditoResponseDTO> response = creditos.stream()
+                .map(creditoMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<?> obtenerPorId(@PathVariable Long id) {
+    public ResponseEntity<?> obtenerCreditoPorId(@PathVariable Long id) {
         try {
             Credito credito = creditoService.buscarPorId(id);
-            return ResponseEntity.ok(credito);
+            return ResponseEntity.ok(creditoMapper.toResponse(credito));
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al obtener credito: " + e.getMessage());
         }
     }
 
-    @PostMapping
-    public ResponseEntity<?> crear(@RequestBody Credito credito) {
-        try {
-            Credito nuevoCredito = creditoService.guardar(credito);
-            return ResponseEntity.status(HttpStatus.CREATED).body(nuevoCredito);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al crear credito: " + e.getMessage());
-        }
+    @GetMapping("/turno-activo")
+    public ResponseEntity<List<CreditoResponseDTO>> obtenerCreditosDelTurnoActivo() {
+        List<Credito> creditos = creditoService.buscarCreditosPorTurno();
+        List<CreditoResponseDTO> response = creditos.stream()
+                .map(creditoMapper::toResponse)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(response);
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<?> actualizar(@PathVariable Long id, @RequestBody Credito detalles) {
+    public ResponseEntity<?> actualizarCredito(@PathVariable Long id, @RequestBody CreditoRequest creditoRequest) {
         try {
-            return creditoService.actualizar(id, detalles)
-                    .<ResponseEntity<?>>map(ResponseEntity::ok)
-                    .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND).body("Credito con ID " + id + " no encontrado"));
+            CreditoResponseDTO response = creditoService.actualizar(id, creditoRequest);
+            return ResponseEntity.status(HttpStatus.CREATED).body(response);
+
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al actualizar credito: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @GetMapping("/listar-productos-clientes")
+    public ResponseEntity<?> listarProductosClientes() {
+        try {
+            com.parqueadero.dtos.creditos.CreditoFormularioDTO response = creditoService.getDatosParaFormulario();
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al obtener los datos del formulario: " + e.getMessage());
         }
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> eliminar(@PathVariable Long id) {
+    public ResponseEntity<?> eliminarCredito(@PathVariable Long id) {
         try {
-            creditoService.buscarPorId(id);
-            creditoService.eliminarPorId(id);
-            return ResponseEntity.noContent().build();
+            CreditoResponseDTO response = creditoService.eliminar(id);
+            return ResponseEntity.ok(response);
         } catch (RuntimeException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al eliminar credito: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al eliminar el crédito: " + e.getMessage());
         }
     }
+
 }

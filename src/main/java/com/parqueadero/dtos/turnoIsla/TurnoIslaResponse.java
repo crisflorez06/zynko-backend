@@ -27,4 +27,5 @@ public class TurnoIslaResponse {
     private double dieselFinal4;
     private Integer totalVentas;
     private Integer TotalTiros;
+    private Integer totalCreditos;
 }
