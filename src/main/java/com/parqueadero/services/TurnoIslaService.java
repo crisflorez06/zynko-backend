@@ -98,6 +98,15 @@ public class TurnoIslaService {
                 .orElseThrow(() -> new RuntimeException("No se encontró ningún turno activo en el sistema."));
     }
 
+    public Integer editarVisa(Integer totalVisa) {
+        TurnoIsla turnoIsla = getTurnoActivo();
+        turnoIsla.setVisas(totalVisa);
+        turnoIslaRepository.save(turnoIsla);
+
+        return turnoIsla.getVisas();
+
+    }
+
     public Integer calcularVentasCombustible(Numeracion numeracionFinal) {
 
         Numeracion numeracionInicial = numeracionInicialTurnoActivo();

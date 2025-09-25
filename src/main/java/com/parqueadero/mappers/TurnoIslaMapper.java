@@ -68,6 +68,7 @@ public class TurnoIslaMapper {
                 .sum());
 
         response.setTotalVentas(turnoIsla.getTotal());
+        response.setTotalVisas(turnoIsla.getVisas());
 
         return response;
     }
