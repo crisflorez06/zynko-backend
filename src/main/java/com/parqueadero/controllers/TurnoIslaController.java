@@ -12,6 +12,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/api/turnos-isla")
@@ -68,7 +69,7 @@ public class TurnoIslaController {
         }
     }
 
-    @PutMapping("/editar-inicial")
+    @PatchMapping("/editar-inicial")
     public ResponseEntity<?> actualizarNumeracionInicial(@RequestBody Numeracion numeracionDto) {
         try {
             Numeracion numeracionActualizada = turnoIslaService.editarNumeracionInicial(numeracionDto);
@@ -89,6 +90,21 @@ public class TurnoIslaController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error al calcular las ventas: " + e.getMessage());
+        }
+    }
+
+    @PatchMapping("/editar-visas")
+    public ResponseEntity<?> editarVisas(@RequestBody Map<String, Integer> body) {
+        try {
+            Integer visas = body.get("totalVisas");
+            if (visas == null || visas < 0) {
+                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("El campo 'totalVisas' es requerido.");
+            }
+            return ResponseEntity.ok(turnoIslaService.editarVisa(visas));
+        } catch (IllegalStateException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error al registrar el total de las visas: " + e.getMessage());
         }
     }
 
