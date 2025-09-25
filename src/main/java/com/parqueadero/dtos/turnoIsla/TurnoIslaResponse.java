@@ -29,4 +29,5 @@ public class TurnoIslaResponse {
     private Integer TotalTiros;
     private Integer totalCreditos;
     private Integer totalVisas;
+    private Integer totalGastos;
 }

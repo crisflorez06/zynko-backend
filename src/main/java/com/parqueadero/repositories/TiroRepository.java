@@ -12,5 +12,6 @@ public interface TiroRepository extends JpaRepository<Tiro, Long> {
 
     List<Tiro> findAllByTurnoIslaId(Long turnoIslaId);
 
+    //este metodo se crea para saber el numero del tiro en el turno
     Optional<Tiro> findTopByTurnoIslaIdOrderByIdDesc(Long turnoIslaId);
 }

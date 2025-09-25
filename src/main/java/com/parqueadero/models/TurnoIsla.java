@@ -43,11 +43,9 @@ public class TurnoIsla {
 
     private Integer visas;
 
-    @ElementCollection
-    @CollectionTable(name = "turno_isla_gastos", joinColumns = @JoinColumn(name = "turno_isla_id"))
-    @MapKeyColumn(name = "gasto_nombre")
-    @Column(name = "gasto_valor")
-    private Map<String, Integer> gastos;
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "turno_isla_id")
+    private List<Gasto> gastos;
 
     private Integer total;
 
@@ -134,11 +132,11 @@ public class TurnoIsla {
         this.visas = visas;
     }
 
-    public Map<String, Integer> getGastos() {
+    public List<Gasto> getGastos() {
         return gastos;
     }
 
-    public void setGastos(Map<String, Integer> gastos) {
+    public void setGastos(List<Gasto> gastos) {
         this.gastos = gastos;
     }
 
