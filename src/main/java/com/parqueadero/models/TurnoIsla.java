@@ -190,6 +190,7 @@ public class TurnoIsla {
         this.cuadre = cuadre;
     }
 
+
     @PrePersist
     public void prePersist() {
         this.cuadre = 0;
@@ -197,4 +198,5 @@ public class TurnoIsla {
         this.total = 0;
         this.numeracionFinal = this.numeracionInicial;
     }
+
 }
