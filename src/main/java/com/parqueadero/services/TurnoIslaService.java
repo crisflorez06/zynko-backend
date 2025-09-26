@@ -133,9 +133,29 @@ public class TurnoIslaService {
 
         TurnoIsla turnoActivo = getTurnoActivo();
 
-
+        calcularCuadre();
         turnoActivo.setActivo(false);
+
+
         turnoIslaRepository.save(turnoActivo);
     }
+
+    public Integer calcularCuadre() {
+        TurnoIsla turnoIsla = getTurnoActivo();
+        TurnoIslaResponse turnoIslaResponse = turnoIslaMapper.toResponseDto(turnoIsla);
+
+
+        turnoIsla.setCuadre(
+                 turnoIslaResponse.getTotalVentas() -
+                turnoIslaResponse.getTotalTiros() -
+                turnoIslaResponse.getTotalCreditos() -
+                turnoIslaResponse.getTotalVisas() -
+                turnoIslaResponse.getTotalGastos());
+
+        turnoIslaRepository.save(turnoIsla);
+        return turnoIsla.getCuadre();
+    }
+
+
 
 }

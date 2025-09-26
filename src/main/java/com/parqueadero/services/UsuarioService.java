@@ -1,8 +1,6 @@
 package com.parqueadero.services;
 
-import com.parqueadero.controllers.TurnoIslaController;
 import com.parqueadero.dtos.usuarios.UsuarioLogin;
-import com.parqueadero.models.TurnoIsla;
 import com.parqueadero.models.Usuario;
 import com.parqueadero.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;

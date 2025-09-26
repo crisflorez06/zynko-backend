@@ -55,24 +55,22 @@ public class TurnoIslaMapper {
             response.setDieselFinal4(numeracionFinal.getDiesel4());
         }
 
-
+        response.setTotalVentas(turnoIsla.getTotal());
 
         response.setTotalTiros(turnoIsla.getTiros().stream()
                 .mapToInt(t -> t.getCantidad() != null ? t.getCantidad() : 0)
                 .sum());
 
-
         response.setTotalCreditos(turnoIsla.getCreditos().stream()
                 .mapToInt(c -> c.getTotal() != null ? c.getTotal() : 0)
                 .sum());
-
-        response.setTotalVentas(turnoIsla.getTotal());
 
         response.setTotalGastos(turnoIsla.getGastos().stream()
                 .mapToInt(g -> g.getCantidad() != null ? g.getCantidad() : 0)
                 .sum());
 
         response.setTotalVisas(turnoIsla.getVisas());
+        response.setCuadre(turnoIsla.getCuadre());
 
         return response;
     }

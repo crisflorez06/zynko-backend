@@ -49,6 +49,8 @@ public class TurnoIsla {
 
     private Integer total;
 
+    private Integer cuadre;
+
     public TurnoIsla() {
     }
 
@@ -178,5 +180,13 @@ public class TurnoIsla {
 
     public void setTotalVentaDiesel(Double totalVentaDiesel) {
         this.totalVentaDiesel = totalVentaDiesel;
+    }
+
+    public Integer getCuadre() {
+        return cuadre;
+    }
+
+    public void setCuadre(Integer cuadre) {
+        this.cuadre = cuadre;
     }
 }
