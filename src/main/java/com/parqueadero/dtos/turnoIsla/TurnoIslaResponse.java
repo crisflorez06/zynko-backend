@@ -30,4 +30,5 @@ public class TurnoIslaResponse {
     private Integer totalCreditos;
     private Integer totalVisas;
     private Integer totalGastos;
+    private Integer cuadre;
 }
