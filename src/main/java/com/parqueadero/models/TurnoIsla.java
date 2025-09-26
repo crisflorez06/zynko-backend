@@ -189,4 +189,14 @@ public class TurnoIsla {
     public void setCuadre(Integer cuadre) {
         this.cuadre = cuadre;
     }
+
+
+    @PrePersist
+    public void prePersist() {
+        this.cuadre = 0;
+        this.visas = 0;
+        this.total = 0;
+        this.numeracionFinal = this.numeracionInicial;
+    }
+
 }
