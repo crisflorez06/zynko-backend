@@ -7,7 +7,7 @@ import lombok.NoArgsConstructor;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-public class VehiculoCierreDTO {
+public class VehiculoDTO {
 
     private String placa;
     private String tipo;

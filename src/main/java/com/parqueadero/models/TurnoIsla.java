@@ -3,8 +3,8 @@ package com.parqueadero.models;
 import jakarta.persistence.*;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 
 @Entity
 @Table(name = "turno_isla")
@@ -46,6 +46,10 @@ public class TurnoIsla {
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
     @JoinColumn(name = "turno_isla_id")
     private List<Gasto> gastos;
+
+    @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true)
+    @JoinColumn(name = "turno_isla_id")
+    private List<Lavado> lavados = new ArrayList<>();
 
     private Integer total;
 
@@ -140,6 +144,14 @@ public class TurnoIsla {
 
     public void setGastos(List<Gasto> gastos) {
         this.gastos = gastos;
+    }
+
+    public List<Lavado> getLavados() {
+        return lavados;
+    }
+
+    public void setLavados(List<Lavado> lavados) {
+        this.lavados = lavados;
     }
 
     public Integer getTotal() {

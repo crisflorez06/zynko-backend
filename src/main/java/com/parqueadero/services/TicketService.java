@@ -7,7 +7,7 @@ import java.util.stream.Collectors;
 
 import com.parqueadero.dtos.cierreTurno.DetalleParqueaderoCierre;
 import com.parqueadero.dtos.vehiculos.TotalVehiculosDTO;
-import com.parqueadero.dtos.vehiculos.VehiculoCierreDTO;
+import com.parqueadero.dtos.vehiculos.VehiculoDTO;
 import com.parqueadero.models.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -236,7 +236,7 @@ public class TicketService {
                     entrantes.stream().map(Ticket::getVehiculo).collect(Collectors.toList())
             );
             detalle.setListaVehiculosSalientes(
-                    salientes.stream().map(ticket -> new VehiculoCierreDTO(
+                    salientes.stream().map(ticket -> new VehiculoDTO(
                             ticket.getVehiculo().getPlaca(),
                             ticket.getVehiculo().getTipo(),
                             ticket.getPago().getTotal()
@@ -246,7 +246,7 @@ public class TicketService {
                     dentroParqueadero.stream().map(Ticket::getVehiculo).collect(Collectors.toList())
             );
             detalle.setVehiculosMensualidad(
-                    mensualidad.stream().map(ticket -> new VehiculoCierreDTO(
+                    mensualidad.stream().map(ticket -> new VehiculoDTO(
                             ticket.getVehiculo().getPlaca(),
                             ticket.getVehiculo().getTipo(),
                             ticket.getPago().getTotal()
@@ -287,4 +287,3 @@ public class TicketService {
     }
 
 }
-

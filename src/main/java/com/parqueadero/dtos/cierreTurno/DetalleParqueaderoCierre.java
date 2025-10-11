@@ -1,7 +1,7 @@
 package com.parqueadero.dtos.cierreTurno;
 
 import com.parqueadero.dtos.vehiculos.TotalVehiculosDTO;
-import com.parqueadero.dtos.vehiculos.VehiculoCierreDTO;
+import com.parqueadero.dtos.vehiculos.VehiculoDTO;
 import com.parqueadero.models.Vehiculo;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -15,9 +15,9 @@ import java.util.List;
 public class DetalleParqueaderoCierre {
 
     private List<Vehiculo> listaVehiculosEntrantes;
-    private List<VehiculoCierreDTO> listaVehiculosSalientes;
+    private List<VehiculoDTO> listaVehiculosSalientes;
     private Integer totalAPagar;
-    private List<VehiculoCierreDTO> vehiculosMensualidad;
+    private List<VehiculoDTO> vehiculosMensualidad;
     private List<Vehiculo> vehiculosEnParqueadero;
     private List<TotalVehiculosDTO> listaTiposVehiculosEntrantes;
     private List<TotalVehiculosDTO> listaTiposVehiculosSalientes;

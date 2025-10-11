@@ -13,4 +13,5 @@ public class FiltrosDTO {
     private List<String> usuarios;
     private List<String> tiposVehiculo;
     private List<String> parqueaderos;
+    private List<String> lavadores;
 }
