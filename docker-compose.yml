@@ -1,21 +1,21 @@
 services:
   mysql:
     image: mysql:8.0
-    container_name: mysql-parqueadero
+    container_name: mysql-zynko
     ports:
       - "3310:3306"
     environment:
-      MYSQL_DATABASE: parqueadero
+      MYSQL_DATABASE: zynko
       MYSQL_ROOT_PASSWORD: nacional2000
     volumes:
       - mysql_data:/var/lib/mysql
     networks:
-      - parqueadero-net
+      - zynko-net
 
 
   phpmyadmin:
     image: phpmyadmin/phpmyadmin
-    container_name: parqueadero-phpmyadmin
+    container_name: zynko-phpmyadmin
     restart: always
     ports:
       - "8081:80"
@@ -26,10 +26,10 @@ services:
     depends_on:
       - mysql
     networks:
-      - parqueadero-net
+      - zynko-net
 
 volumes:
   mysql_data:
 
 networks:
-  parqueadero-net:
+  zynko-net:

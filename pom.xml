@@ -11,11 +11,11 @@
         <relativePath />
     </parent>
 
-    <groupId>parqueadero</groupId>
-    <artifactId>parqueadero</artifactId>
+    <groupId>zynko</groupId>
+    <artifactId>zynko</artifactId>
     <version>0.0.1-SNAPSHOT</version>
-    <name>parqueadero</name>
-    <description>Demo project for Spring Boot</description>
+    <name>zynko</name>
+    <description>Zynko backend service</description>
 
     <properties>
         <java.version>21</java.version>
