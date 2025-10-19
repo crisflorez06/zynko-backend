@@ -25,4 +25,4 @@ COPY src ./src
 RUN ./mvnw clean install -DskipTests
 
 # Ejecutar el .jar generado
-ENTRYPOINT ["java", "-jar", "target/parqueadero-0.0.1-SNAPSHOT.jar"]
+ENTRYPOINT ["java", "-jar", "target/zynko-0.0.1-SNAPSHOT.jar"]

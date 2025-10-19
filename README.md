@@ -1,4 +1,4 @@
-# 🚗 Parqueadero - Backend de Gestión
+# ⚡ Zynko - Backend de Gestión
 
 Un backend diseñado para la **gestión de parqueaderos**, que permite controlar entradas, salidas, pagos y generar
 reportes de cierre de turno.
@@ -9,7 +9,7 @@ despliegue.
 
 ## ⭐ Característica Destacada: Generación de Tickets
 
-La funcionalidad más importante del sistema es el **control mediante tickets**, lo que permite un registro claro y
+La funcionalidad más importante del sistema es el **control mediante ticketParqueaderos**, lo que permite un registro claro y
 auditable de las operaciones:
 
 * **Ticket de Entrada**: Registra el ingreso de vehículos con datos como placa, tipo y hora.
@@ -54,8 +54,8 @@ backend.
 Clona el repositorio:
 
 ```bash
-git clone https://github.com/tu-usuario/parqueadero_backend.git
-cd parqueadero_backend
+git clone https://github.com/tu-usuario/zynko-backend.git
+cd zynko-backend
 ```
 
 Copia el archivo de entorno:
@@ -90,7 +90,7 @@ docker-compose up --build -d
 Clona el repositorio y crea la base de datos:
 
 ```sql
-CREATE DATABASE parqueadero;
+CREATE DATABASE zynko;
 ```
 
 Configura las credenciales en `src/main/resources/application.properties` o `application.yml`.
@@ -98,7 +98,7 @@ Luego compila y ejecuta:
 
 ```bash
 mvn clean package -DskipTests
-java -jar target/parqueadero-0.0.1-SNAPSHOT.jar
+java -jar target/zynko-0.0.1-SNAPSHOT.jar
 ```
 
 La aplicación correrá en:
@@ -110,10 +110,10 @@ La aplicación correrá en:
 
 | Método | Endpoint                     | Descripción                        |
 | ------ | ---------------------------- | ---------------------------------- |
-| GET    | `/api/tickets`               | Listar tickets de entrada          |
-| POST   | `/api/tickets`               | Crear un nuevo ticket de entrada   |
+| GET    | `/api/ticketParqueaderos`               | Listar ticketParqueaderos de entrada          |
+| POST   | `/api/ticketParqueaderos`               | Crear un nuevo ticketParqueadero de entrada   |
 | GET    | `/api/pagos`                 | Listar pagos registrados           |
-| POST   | `/api/pagos`                 | Registrar un nuevo pago            |
+| POST   | `/api/pagos`                 | Registrar un nuevo pagoParqueadero            |
 | GET    | `/api/reportes/cierre-turno` | Generar reporte de cierre de turno |
 
 ---
@@ -131,7 +131,7 @@ del backend. Para habilitarla, sigue estos pasos:
    *Este archivo está ignorado por Git por seguridad.*
 
 2. **Activar el Controlador:**
-   En el archivo `src/main/java/com/parqueadero/controllers/QzSignatureController.java`, descomenta la anotación
+   En el archivo `src/main/java/com/zynko/controllers/QzSignatureController.java`, descomenta la anotación
    `@RestController`.
    ```java
    // Cambia de:
@@ -142,7 +142,7 @@ del backend. Para habilitarla, sigue estos pasos:
    ```
 
 3. **Activar la Configuración de la Clave:**
-   En el archivo `src/main/java/com/parqueadero/config/QzKeyConfig.java`, descomenta la anotación `@Configuration`.
+   En el archivo `src/main/java/com/zynko/config/QzKeyConfig.java`, descomenta la anotación `@Configuration`.
    ```java
    // Cambia de:
    //@Configuration
@@ -158,7 +158,7 @@ activo.
 
 ## 🚧 Estado del Proyecto y Futuro
 
-✅ Gestión de tickets de entrada y cierre
+✅ Gestión de ticketParqueaderos de entrada y cierre
 ✅ Registro de pagos asociados
 ✅ Reportes de cierre de turno
 
@@ -178,6 +178,6 @@ Proyecto desarrollado por **Cristian Flórez**.
 
 ## 📄 Licencia
 
-Distribuido bajo la licencia [MIT](../repositorio_cristian/parqueadero_backend/LICENSE).
+Distribuido bajo la licencia [MIT](../repositorio_cristian/zynko-backend/LICENSE).
 
 ---
