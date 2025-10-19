@@ -11,8 +11,7 @@ public class LavadoRequest {
 
     private String placa;
     private String tipoVehiculo;
-    private String lavador;
     private Long lavadorId;
     private Integer valorTotal;
-    private boolean pagado;
+    private Boolean pagado;
 }

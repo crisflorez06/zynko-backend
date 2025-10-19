@@ -19,8 +19,6 @@ public class Lavado {
     @Column(name = "tipo_vehiculo")
     private String tipoVehiculo;
 
-    private String lavador;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JsonIgnore
     @JoinColumn(name = "lavador_id")
@@ -77,14 +75,6 @@ public class Lavado {
 
     public void setTipoVehiculo(String tipoVehiculo) {
         this.tipoVehiculo = tipoVehiculo;
-    }
-
-    public String getLavador() {
-        return lavador;
-    }
-
-    public void setLavador(String lavador) {
-        this.lavador = lavador;
     }
 
     public Lavador getLavadorEntity() {

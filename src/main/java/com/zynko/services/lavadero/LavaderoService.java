@@ -1,9 +1,6 @@
 package com.zynko.services.lavadero;
 
-import com.zynko.dtos.lavado.lavadero.LavadoRequest;
-import com.zynko.dtos.lavado.lavadero.LavadoResponse;
-import com.zynko.dtos.lavado.lavadero.ResumenLavadorDTO;
-import com.zynko.dtos.lavado.lavadero.ResumenLavaderoResponse;
+import com.zynko.dtos.lavado.lavadero.*;
 import com.zynko.dtos.vehiculos.VehiculoDTO;
 import com.zynko.mappers.lavadero.LavadoMapper;
 import com.zynko.models.lavadero.Lavado;
@@ -15,8 +12,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.TemporalAdjusters;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -64,8 +64,23 @@ public class LavaderoService {
     @Transactional
     public LavadoResponse actualizarLavado(Long id, LavadoRequest request) {
         Lavado lavado = buscarLavadoPorId(id);
+        boolean pagadoActual = lavado.isPagado();
+        Boolean pagadoSolicitado = request.getPagado();
+
         lavadoMapper.actualizarDesdeRequest(request, lavado);
         asignarLavador(request, lavado);
+
+        if (Boolean.TRUE.equals(pagadoSolicitado)) {
+            lavado.setPagado(true);
+        } else if (Boolean.FALSE.equals(pagadoSolicitado)) {
+            if (pagadoActual) {
+                throw new RuntimeException("No es posible marcar como pendiente un lavado que ya está pagado.");
+            }
+            lavado.setPagado(false);
+        } else {
+            lavado.setPagado(pagadoActual);
+        }
+
         Lavado guardado = lavadoRepository.save(lavado);
         return lavadoMapper.toResponse(guardado);
     }
@@ -73,13 +88,59 @@ public class LavaderoService {
     @Transactional
     public LavadoResponse marcarPago(Long id, boolean pagado) {
         Lavado lavado = buscarLavadoPorId(id);
-        lavado.setPagado(pagado);
+
+        if (lavado.isPagado() && !pagado) {
+            throw new RuntimeException("No es posible marcar como pendiente un lavado que ya está pagado.");
+        }
+
+        lavado.setPagado(lavado.isPagado() || pagado);
         Lavado guardado = lavadoRepository.save(lavado);
         return lavadoMapper.toResponse(guardado);
     }
 
+    @Transactional
+    public LavadoResponse anularLavado(Long id) {
+        Lavado lavado = buscarLavadoPorId(id);
+        lavado.setValorTotal(0);
+        lavado.setPagado(false);
+        Lavado guardado = lavadoRepository.save(lavado);
+        return lavadoMapper.toResponse(guardado);
+    }
+
+
     public LavadoResponse obtenerLavadoPorId(Long id) {
         return lavadoMapper.toResponse(buscarLavadoPorId(id));
+    }
+
+    public List<ResumenSemanalLavadorDTO> obtenerResumenSemanalLavadores() {
+        LocalDate hoy = LocalDate.now();
+        LocalDate inicioSemana = hoy.with(TemporalAdjusters.previousOrSame(DayOfWeek.SUNDAY));
+        LocalDate finSemana = inicioSemana.plusDays(6);
+
+        LocalDateTime inicio = inicioSemana.atStartOfDay();
+        LocalDateTime fin = finSemana.atTime(LocalTime.MAX);
+
+        List<Lavado> lavados = lavadoRepository.findByFechaRegistroBetweenOrderByFechaRegistroDesc(inicio, fin);
+
+        Map<String, ResumenSemanalLavadorDTO> acumuladoPorLavador = new HashMap<>();
+
+        for (Lavado lavado : lavados) {
+            int valor = lavado.getValorTotal() != null ? lavado.getValorTotal()/2 : 0;
+            Lavador lavador = lavado.getLavadorEntity();
+            String nombreLavador = lavador != null ? lavador.getNombre() : "Sin asignar";
+
+            ResumenSemanalLavadorDTO resumen = acumuladoPorLavador.computeIfAbsent(
+                    nombreLavador,
+                    ResumenSemanalLavadorDTO::new
+            );
+
+            resumen.acumular(lavado.getFechaRegistro().getDayOfWeek(), valor);
+        }
+
+        return acumuladoPorLavador.values()
+                .stream()
+                .sorted(Comparator.comparing(ResumenSemanalLavadorDTO::getLavador))
+                .collect(Collectors.toList());
     }
 
     public ResumenLavaderoResponse obtenerResumenTurnoActivo() {
@@ -101,8 +162,9 @@ public class LavaderoService {
 
         Map<String, List<Lavado>> agrupadosPorLavador = lavados.stream()
                 .collect(Collectors.groupingBy(l -> {
-                    String lavador = l.getLavador();
-                    return lavador != null && !lavador.isBlank() ? lavador : "Sin asignar";
+                    Lavador lavador = l.getLavadorEntity();
+                    String nombreLavador = lavador != null ? lavador.getNombre() : null;
+                    return nombreLavador != null && !nombreLavador.isBlank() ? nombreLavador : "Sin asignar";
                 }));
 
         List<ResumenLavadorDTO> detalleLavadores = agrupadosPorLavador.entrySet()
@@ -148,21 +210,23 @@ public class LavaderoService {
     }
 
     private void asignarLavador(LavadoRequest request, Lavado lavado) {
-        Lavador lavador = null;
         if (request.getLavadorId() != null) {
-            lavador = lavadorService.obtenerPorId(request.getLavadorId());
-        } else if (request.getLavador() != null && !request.getLavador().isBlank()) {
-            lavador = lavadorService.buscarPorNombre(request.getLavador());
+            Lavador lavador = lavadorService.obtenerPorId(request.getLavadorId());
+            lavado.setLavadorEntity(lavador);
+        } else if (lavado.getLavadorEntity() == null) {
+            throw new RuntimeException("Debe proporcionar el identificador del lavador.");
+        }
+    }
+
+    @Transactional
+    public void cambiarDia() {
+        List<Lavado> lavadosNoPagados = lavadoRepository.findByPagadoFalse();
+
+        for (Lavado lavado : lavadosNoPagados) {
+            LocalDateTime nuevaFecha = lavado.getFechaRegistro().plusDays(1);
+            lavado.setFechaRegistro(nuevaFecha);
         }
 
-        if (lavador != null) {
-            lavado.setLavadorEntity(lavador);
-            lavado.setLavador(lavador.getNombre());
-        } else {
-            lavado.setLavadorEntity(null);
-            if (request.getLavador() != null) {
-                lavado.setLavador(request.getLavador());
-            }
-        }
+        lavadoRepository.saveAll(lavadosNoPagados);
     }
 }

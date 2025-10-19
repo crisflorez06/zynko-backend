@@ -3,6 +3,7 @@ package com.zynko.controllers.lavado;
 import com.zynko.dtos.lavado.lavadero.LavadoRequest;
 import com.zynko.dtos.lavado.lavadero.LavadoResponse;
 import com.zynko.dtos.lavado.lavadero.ResumenLavaderoResponse;
+import com.zynko.dtos.lavado.lavadero.ResumenSemanalLavadorDTO;
 import com.zynko.services.lavadero.LavaderoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -71,8 +72,33 @@ public class LavaderoController {
         }
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> eliminarLavado(@PathVariable Long id) {
+        try {
+            LavadoResponse respuesta = lavaderoService.anularLavado(id);
+            return ResponseEntity.ok(respuesta);
+        } catch (RuntimeException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                    .body("Lavado no encontrado con id: " + id);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("No fue posible eliminar el lavado: " + e.getMessage());
+        }
+    }
+
     @GetMapping("/turno-activo/resumen")
     public ResponseEntity<ResumenLavaderoResponse> obtenerResumenTurnoActivo() {
         return ResponseEntity.ok(lavaderoService.obtenerResumenTurnoActivo());
+    }
+
+    @GetMapping("/resumen-semanal")
+    public ResponseEntity<List<ResumenSemanalLavadorDTO>> obtenerResumenSemanalLavadores() {
+        return ResponseEntity.ok(lavaderoService.obtenerResumenSemanalLavadores());
+    }
+
+    @PutMapping("/ajustar-fechas")
+    public ResponseEntity<String> ajustarFechas() {
+        lavaderoService.cambiarDia();
+        return ResponseEntity.ok("Vehiculos no pagos pasados para mañana.");
     }
 }

@@ -14,14 +14,19 @@ public interface LavadoMapper {
     @Mapping(target = "fechaRegistro", ignore = true)
     @Mapping(target = "turnoIsla", ignore = true)
     @Mapping(target = "lavadorEntity", ignore = true)
+    @Mapping(target = "pagado", ignore = true)
+    @Mapping(target = "tipoVehiculo", source = "tipoVehiculo")
     Lavado toEntity(LavadoRequest request);
 
     @Mapping(target = "lavadorId", expression = "java(lavado.getLavadorEntity() != null ? lavado.getLavadorEntity().getId() : null)")
+    @Mapping(target = "lavador", expression = "java(lavado.getLavadorEntity() != null ? lavado.getLavadorEntity().getNombre() : null)")
     LavadoResponse toResponse(Lavado lavado);
 
     @Mapping(target = "id", ignore = true)
     @Mapping(target = "turnoIsla", ignore = true)
     @Mapping(target = "fechaRegistro", ignore = true)
     @Mapping(target = "lavadorEntity", ignore = true)
+    @Mapping(target = "pagado", ignore = true)
+    @Mapping(target = "tipoVehiculo", source = "tipoVehiculo")
     void actualizarDesdeRequest(LavadoRequest request, @MappingTarget Lavado lavado);
 }
